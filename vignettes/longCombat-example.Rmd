@@ -1,36 +1,54 @@
-###########################################################-
-# longCombat package examples
-# JCBeer joanne.beer@pennmedicine.upenn.edu
-# 13 Sept 2021
-###########################################################-
+---
+title: "longCombat example"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{longCombat example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
-#################################-
-# install longCombat package ----
-#################################-
-# install.packages("devtools")
-# devtools::install_github("jcbeer/longCombat")
+```{r options, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 4
+)
+```
 
-#################################-
-# load longCombat package ----
-#################################-
+JCBeer [joanne.beer\@pennmedicine.upenn.edu](mailto:joanne.beer@pennmedicine.upenn.edu){.email}
+
+13 Sept 2021
+
+## Setup
+
+Install the longCombat package:
+
+```{r install, eval=FALSE, include=TRUE}
+install.packages("devtools")
+devtools::install_github("jcbeer/longCombat")
+```
+
+Load the longCombat package:
+
+```{r load, eval=TRUE, include=TRUE}
 library(longCombat)
-# check documentation
-?longCombat
+# check documentation: ?longCombat
+```
 
-#################################-
-# install and load invgamma & lmer package ----
-#################################-
+Load additional packages used in the example:
+
+```{r load2, message=FALSE, warning=FALSE}
 # install.packages("invgamma")
 library(invgamma)
 library(lme4)
+```
 
-#################################-
-# simulate data to run the functions ----
-#################################-
-# 100 subjects with 5 time points each
-# 8 scanners / batches
-# 20 features
-#################################-
+## Simulate Problem Data
+
+Simulate example data to run the functions on. This will be 100 subjects with 5 time points each. Subjects are measured with one of four different batch patterns where a batch pattern involves sequential observations from a number of scanners, 1:3 scanners in each batch pattern. Twenty MRI features will be simulated per scan.
+
+```{r simulate}
 # set random seed
 set.seed(1)
 # simulate the covariates
@@ -47,6 +65,10 @@ batch.patterns <- matrix(c(1, 1, 1, 2, 2,
                            6, 6, 6, 6, 6,
                            7, 7, 8, 8, 8),
                          ncol = 4)
+
+# inspect the batch patterns:
+batch.patterns
+
 # randomly sample 100 batch patterns
 batch.pattern.sample <- sample(1:4, 100, replace = TRUE)
 simdata$batch <- as.vector(batch.patterns[, batch.pattern.sample])
@@ -100,36 +122,37 @@ featurenames <- paste0("feature", 1:20)
 colnames(features) <- featurenames
 # combine into one data frame
 simdata <- data.frame(simdata, features)
-# remove some stuff no longer needed
-rm("features", "batch.patterns", "batch.pattern.sample", "i")
+```
 
-#################################-
-# longCombat functions:
-#################################-
-# batchTimeViz() -- visualize change in batch over time
-# batchBoxplot() -- to visualize residuals across batches
-# trajPlot() -- visualize trajectories
-# addTest() -- test for additive scanner effects
-# multTest() -- test for multiplicative scanner effects
-# longCombat() -- apply longitudinal ComBat
-#################################-
-# type e.g. ?longCombat to get further documentation
-#################################-
+Note, this example uses random subject-intercept models (`ranef="(1|subid)"`). To additionally use a random slope use: `ranef="(1 + time|subid)"`.
 
-# these examples (ranef="(1|subid)") are for random subject intercept
-# use ranef="(1 + time|subid)" to add random slope
+## Key Functions
 
-#################################-
-# batchTimeViz() -- visualize change in batch over time ----
-#################################-
+The key longCombat functions are:
+
+| Function         | Purpose                                 |
+|------------------|-----------------------------------------|
+| `batchTimeViz()` | visualize change in batch over time     |
+| `batchBoxplot()` | to visualize residuals across batches   |
+| `trajPlot()`     | visualize trajectories                  |
+| `addTest()`      | test for additive scanner effects       |
+| `multTest()`     | test for multiplicative scanner effects |
+| `longCombat()`   | apply longitudinal ComBat               |
+
+### batchTimeViz() – visualize change in batch over time
+
+```{r batchTimeViz}
 batchTimeViz(batchvar = "batch",
              timevar = "time",
              data = simdata)
+```
 
-#################################-
-# batchBoxplot() -- to visualize residuals across batches ----
-# can do for each feature you are interested in
-#################################-
+### batchBoxplot() - to visualize residuals across batches
+
+(can be run for each feature of interest)
+
+```{r batchBoxplot}
+
 # make batch boxplot for feature1, do not adjust for batch
 batchBoxplot(
   idvar = "subid",
@@ -167,9 +190,12 @@ batchBoxplot(
   colors = 1:8
 )
 
-#################################-
-# trajPlot() -- visualize trajectories ----
-#################################-
+```
+
+### trajPlot() - visualize trajectories
+
+```{r trajPlot}
+
 # for everyone
 trajPlot(
   idvar = "subid",
@@ -200,9 +226,12 @@ trajPlot(
   line.col = rep(2, 250)
 )
 
-#################################-
-# addTest() -- test for additive scanner effects ----
-#################################-
+
+```
+
+### addTest() - test for additive scanner effects
+
+```{r addTest}
 addTestTable <- addTest(
   idvar = "subid",
   batchvar = "batch",
@@ -239,9 +268,11 @@ batchBoxplot(
   title = "Feature 2"
 )
 
-#################################-
-# multTest() -- test for multiplicative scanner effects ----
-#################################-
+```
+
+### multTest() - test for multiplicative scanner effects
+
+```{r multTestTable}
 multTestTable <- multTest(
   idvar = "subid",
   batchvar = "batch",
@@ -283,10 +314,12 @@ batchBoxplot(
   orderby = "var",
   title = "Feature 1"
 )
+```
 
-#################################-
-# longCombat() -- apply longitudinal ComBat ----
-#################################-
+### longCombat() - apply longitudinal ComBat
+
+```{r longCombat}
+
 simdata_combat <- longCombat(
   idvar = "subid",
   timevar = "time",
@@ -297,7 +330,6 @@ simdata_combat <- longCombat(
   data = simdata
 )
 
-#################################-
 # get the harmonized data
 simdata_harmonized <- simdata_combat$data_combat
 # save combat feature names
@@ -307,9 +339,12 @@ simdata <- merge(simdata,
                  simdata_harmonized[, c(1, 2, 4:23)],
                  by = c("subid", "time"))
 
-#################################-
-# test for additive scanner effects in combatted data ----
-#################################-
+```
+
+#### Test for additive scanner effects in ComBatted data
+
+```{r}
+
 addTestTableCombat <- addTest(
   idvar = "subid",
   batchvar = "batch",
@@ -355,9 +390,13 @@ batchBoxplot(
   title = "feature 5 after combat"
 )
 
-#################################-
-# test for multiplicative scanner effects in combatted data ----
-#################################-
+
+```
+
+#### Test for multiplicative scanner effects in ComBatted data
+
+```{r}
+
 multTestTableCombat <- multTest(
   idvar = "subid",
   batchvar = "batch",
@@ -406,9 +445,13 @@ batchBoxplot(
   title = "Feature 3 after ComBat"
 )
 
-#################################-
-# plot trajectories before and after combat ----
-#################################-
+
+```
+
+#### Plot trajectories before and after ComBat
+
+```{r, fig.width=8, fig.height=6}
+
 par(mfrow = c(1, 2))
 trajPlot(
   idvar = "subid",
@@ -434,9 +477,14 @@ trajPlot(
   line.col = simdata$diagnosis[!duplicated(simdata$subid)] + 1
 )
 
-#################################-
-# fit LME models before / after ComBat ----
-#################################-
+
+```
+
+
+#### fit LME models before / after ComBat
+
+```{r}
+
 # before ComBat
 feature5.fit <- lmer(feature5 ~ age + diagnosis * time + (1 | subid),
                      data = simdata)
@@ -451,8 +499,9 @@ feature5combat.batch.fit <- lmer(feature5.combat ~ age + diagnosis * time +
                                    as.factor(batch) + (1 | subid),
                                  data = simdata)
 
-summary(feature5.fit)
-summary(feature5.batch.fit)
+summary(feature5.fit, cor = FALSE)
+summary(feature5.batch.fit, cor = FALSE)
 
-summary(feature5combat.fit)
-summary(feature5combat.batch.fit)
+summary(feature5combat.fit, cor = FALSE)
+summary(feature5combat.batch.fit, cor = FALSE)
+```
