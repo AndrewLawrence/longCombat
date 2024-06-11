@@ -17,6 +17,7 @@ batchBoxplot(
   colors = "grey",
   xlabel = "batch",
   ylabel = "residuals",
+  ylim = NULL,
   title = "",
   verbose = TRUE,
   ...
@@ -46,6 +47,8 @@ batchBoxplot(
 \item{xlabel}{x-axis label (character string). Default is \code{'batch'}.}
 
 \item{ylabel}{y-axis label (character string). Default is \code{'residuals'}.}
+
+\item{ylim}{y-axis limits.}
 
 \item{title}{main title for the plot, default is no title (character string).}
 
