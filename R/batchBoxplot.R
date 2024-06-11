@@ -21,6 +21,9 @@
 #' @param ... other graphical parameter arguments passed to \code{\link[graphics]{par}}.
 #' @return Creates a boxplot.
 #'
+#' @importFrom stats residuals aggregate var
+#' @importFrom graphics par boxplot points mtext abline
+#' 
 #' @export
 
 # nolint end

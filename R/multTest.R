@@ -12,6 +12,8 @@
 #' @param verbose prints messages. Logical \code{TRUE} or \code{FALSE}. Default is \code{TRUE}.
 #' @return A data frame of Fligner-Killeen test results for each feature.
 #'
+#' @importFrom stats fligner.test
+#'
 #' @export
 
 # nolint end

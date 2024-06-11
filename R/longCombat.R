@@ -22,6 +22,8 @@
 #'     \item{\code{delta2starhat}}{data frame containing empirical Bayes estimate of multiplicative batch effects}
 #'     }
 #'
+#' @importFrom stats fitted var
+#'
 #' @export
 
 # nolint end
