@@ -1,5 +1,7 @@
+# nolint start
+
 #' Boxplot for Batch Effects
-#' 
+#'
 #' \code{batchBoxplot} function will plot residuals of linear mixed effects model for a single feature by batch to visualize additive and multiplicative batch effects. Data should be in "long" format. Depends on \code{lme4} package.
 #' @param idvar character string that specifies name of ID variable. ID variable can be factor, numeric, or character.
 #' @param batchvar character string that specifies name of the batch variable. Batch variable should be a factor.
@@ -18,67 +20,115 @@
 #' @param verbose prints messages. Logical \code{TRUE} or \code{FALSE}. Default is \code{TRUE}.
 #' @param ... other graphical parameter arguments passed to \code{\link[graphics]{par}}.
 #' @return Creates a boxplot.
-#' 
+#'
 #' @export
 
-batchBoxplot <- function(idvar, batchvar, feature, 
-                         formula, ranef, data,
-                         adjustBatch=FALSE, orderby='mean', 
-                         plotMeans=TRUE, colors='grey',
-                         xlabel='batch', ylabel='residuals',
-                         ylim=NULL,
-                         title='', 
-                         verbose=TRUE, ...){
-  
+# nolint end
+
+batchBoxplot <- function(idvar,
+                         batchvar,
+                         feature,
+                         formula,
+                         ranef,
+                         data,
+                         adjustBatch = FALSE,
+                         orderby = "mean",
+                         plotMeans = TRUE,
+                         colors = "grey",
+                         xlabel = "batch",
+                         ylabel = "residuals",
+                         ylim = NULL,
+                         title = "",
+                         verbose = TRUE,
+                         ...) {
   # make batch a factor if not already
-  data[,batchvar] <- droplevels(as.factor(data[,batchvar]))
-  if (verbose) cat("[batchBoxplot] found", nlevels(data[,batchvar]), 'batches\n')
+  data[, batchvar] <- droplevels(as.factor(data[, batchvar]))
+  if (verbose)
+    cat("[batchBoxplot] found", nlevels(data[, batchvar]), "batches\n")
   # get feature names
   if (is.numeric(feature)) {
     featurename <- names(data)[feature]
   } else {
     featurename <- feature
   }
-  # make color vector 
-  if (length(colors) < nlevels(data[,batchvar])){
-    colors <- rep_len(colors, length.out=nlevels(data[,batchvar]))
+  # make color vector
+  if (length(colors) < nlevels(data[, batchvar])) {
+    colors <- rep_len(colors, length.out = nlevels(data[, batchvar]))
   }
-  
+
   ##############################
   # fit linear mixed effect model
   ##############################
-  if (verbose) cat(paste0('[longCombat] fitting lme model for feature ', feature, '\n'))
+  if (verbose)
+    cat(paste0("[longCombat] fitting lme model for feature ", feature, "\n"))
   # make the lmer formula
-  if (adjustBatch==TRUE){
-    lme_formula <- as.formula(paste0(featurename, '~', formula, '+' , batchvar, '+', ranef))
-  } else if (adjustBatch==FALSE){
-    lme_formula <- as.formula(paste0(featurename, '~', formula, '+', ranef))
+  if (adjustBatch == TRUE) {
+    lme_formula <- as.formula(paste0(featurename, "~",
+                                     formula, "+", batchvar, "+", ranef))
+  } else if (adjustBatch == FALSE) {
+    lme_formula <- as.formula(paste0(featurename, "~", formula, "+", ranef))
   }
   # fit lme4 model
-  lme_fit <- lme4::lmer(lme_formula, data=data, REML=TRUE, control=lme4::lmerControl(optimizer='bobyqa'))
+  lme_fit <- lme4::lmer(
+    lme_formula,
+    data = data,
+    REML = TRUE,
+    control = lme4::lmerControl(optimizer = "bobyqa")
+  )
   # save residuals and their means and variances
-  fit_residuals <- data.frame(residuals=residuals(lme_fit), batch=data[,batchvar])
-  fit_residuals_means <- aggregate(fit_residuals$residuals, by=list(fit_residuals$batch), FUN=mean)
-  fit_residuals_var <- aggregate(fit_residuals$residuals, by=list(fit_residuals$batch), FUN=var)
+  fit_residuals <- data.frame(residuals = residuals(lme_fit),
+                              batch = data[, batchvar])
+  fit_residuals_means <- aggregate(fit_residuals$residuals,
+                                   by = list(fit_residuals$batch),
+                                   FUN = mean)
+  fit_residuals_var <- aggregate(fit_residuals$residuals,
+                                 by = list(fit_residuals$batch),
+                                 FUN = var)
   # order boxplots by mean or variance
-  if (orderby=='mean'){
-    batchorder <- with(fit_residuals, reorder(batch, residuals, mean))
-    colors <- colors[order(fit_residuals_means[,2])]
-  } else if (orderby=='var'){
+  if (orderby == "mean") {
+    batchorder <- with(fit_residuals, reorder(batch, residuals, mean)) # nolint
+    colors <- colors[order(fit_residuals_means[, 2])]
+  } else if (orderby == "var") {
     batchorder <- with(fit_residuals, reorder(batch, residuals, var))
-    colors <- colors[order(fit_residuals_var[,2])]
+    colors <- colors[order(fit_residuals_var[, 2])]
   }
-  
+
   ##############################
   # make plot
   ##############################
-  par(mar=c(3, 5, 3, 1), ...)
-  boxplot(fit_residuals$residuals ~ batchorder, main=title, ylab='', xlab='', 
-          ylim=ylim, lty=1, col=colors, las=1, xaxt='n')
-  if (plotMeans==TRUE){
-    points(fit_residuals_means[,2][order(fit_residuals_means[,2])], pch=5, col='red', cex=0.6)
+  par(mar = c(3, 5, 3, 1), ...)
+  boxplot(
+    fit_residuals$residuals ~ batchorder,
+    main = title,
+    ylab = "",
+    xlab = "",
+    ylim = ylim,
+    lty = 1,
+    col = colors,
+    las = 1,
+    xaxt = "n"
+  )
+  if (plotMeans == TRUE) {
+    points(
+      fit_residuals_means[, 2][order(fit_residuals_means[, 2])],
+      pch = 5,
+      col = "red",
+      cex = 0.6
+    )
   }
-  mtext(text=ylabel, side=2, line=3.5, cex=1.25, font=2)
-  mtext(text=xlabel, side=1, line=1.5, cex=1.25, font=2)
-  abline(h=0)
+  mtext(
+    text = ylabel,
+    side = 2,
+    line = 3.5,
+    cex = 1.25,
+    font = 2
+  )
+  mtext(
+    text = xlabel,
+    side = 1,
+    line = 1.5,
+    cex = 1.25,
+    font = 2
+  )
+  abline(h = 0)
 }
