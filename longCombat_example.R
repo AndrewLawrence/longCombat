@@ -1,36 +1,36 @@
-###########################################################
+###########################################################-
 # longCombat package examples
 # JCBeer joanne.beer@pennmedicine.upenn.edu
 # 13 Sept 2021
-###########################################################
+###########################################################-
 
-#################################
-# install longCombat package
-#################################
+#################################-
+# install longCombat package ----
+#################################-
 # install.packages('devtools')
 # devtools::install_github("jcbeer/longCombat")
 
-#################################
-# load longCombat package
-#################################
+#################################-
+# load longCombat package ----
+#################################-
 library(longCombat)
 # check documentation
 ?longCombat
 
-#################################
-# install and load invgamma & lmer package
-#################################
+#################################-
+# install and load invgamma & lmer package ----
+#################################-
 # install.packages('invgamma')
 library(invgamma)
 library(lme4)
 
-#################################
-# simulate data to run the functions
-#################################
+#################################-
+# simulate data to run the functions ----
+#################################-
 # 100 subjects with 5 time points each
 # 8 scanners / batches
 # 20 features
-#################################
+#################################-
 # set random seed
 set.seed(1)
 # simulate the covariates
@@ -94,33 +94,33 @@ simdata <- data.frame(simdata, features)
 # remove some stuff no longer needed
 rm('features', 'batch.patterns', 'batch.pattern.sample', 'i')
 
-#################################
+#################################-
 # longCombat functions:
-#################################
+#################################-
 # batchTimeViz() -- visualize change in batch over time
 # batchBoxplot() -- to visualize residuals across batches
 # trajPlot() -- visualize trajectories
 # addTest() -- test for additive scanner effects
 # multTest() -- test for multiplicative scanner effects
 # longCombat() -- apply longitudinal ComBat
-#################################
-# type e.g. ?longCombat to get further documentation
-#################################
+#################################-
+# type e.g. ?longCombat to get further documentation 
+#################################-
 
 # these examples (ranef='(1|subid)') are for random subject intercept
 # use ranef='(1 + time|subid)' to add random slope
 
-#################################
-# batchTimeViz() -- visualize change in batch over time
-#################################
+#################################-
+# batchTimeViz() -- visualize change in batch over time ----
+#################################-
 batchTimeViz(batchvar='batch',
              timevar='time',
              data=simdata)
 
-#################################
-# batchBoxplot() -- to visualize residuals across batches
+#################################-
+# batchBoxplot() -- to visualize residuals across batches ----
 # can do for each feature you are interested in
-#################################
+#################################-
 # make batch boxplot for feature1, do not adjust for batch 
 batchBoxplot(idvar='subid', 
              batchvar='batch', 
@@ -152,9 +152,9 @@ batchBoxplot(idvar='subid',
              orderby='var',
              colors=1:8)
 
-#################################
-# trajPlot() -- visualize trajectories
-#################################
+#################################-
+# trajPlot() -- visualize trajectories ----
+#################################-
 # for everyone
 trajPlot(idvar='subid', 
          timevar='time',
@@ -179,9 +179,9 @@ trajPlot(idvar='subid',
          point.col=simdata$batch[simdata$diagnosis==1],
          line.col=rep(2,250))
 
-#################################
-# addTest() -- test for additive scanner effects
-#################################
+#################################-
+# addTest() -- test for additive scanner effects ----
+#################################-
 addTestTable <- addTest(idvar='subid', 
         batchvar='batch', 
         features=featurenames, 
@@ -212,9 +212,9 @@ batchBoxplot(idvar='subid',
              colors=1:8,
              title='Feature 2')
 
-#################################
-# multTest() -- test for multiplicative scanner effects
-#################################
+#################################-
+# multTest() -- test for multiplicative scanner effects ----
+#################################-
 multTestTable <- multTest(idvar='subid', 
                         batchvar='batch', 
                         features=featurenames, 
@@ -251,9 +251,9 @@ batchBoxplot(idvar='subid',
              orderby='var',
              title='Feature 1')
 
-#################################
-# longCombat() -- apply longitudinal ComBat
-#################################
+#################################-
+# longCombat() -- apply longitudinal ComBat ----
+#################################-
 simdata_combat <- longCombat(idvar='subid', 
                              timevar='time',
                              batchvar='batch', 
@@ -262,7 +262,7 @@ simdata_combat <- longCombat(idvar='subid',
                              ranef='(1|subid)',
                              data=simdata)
 
-#################################
+#################################-
 # get the harmonized data
 simdata_harmonized <- simdata_combat$data_combat
 # save combat feature names
@@ -270,9 +270,9 @@ featurenames.combat <- names(simdata_harmonized)[4:23]
 # merge with original dataframe
 simdata <- merge(simdata, simdata_harmonized[,c(1,2,4:23)], by=c('subid', 'time'))
 
-#################################
-# test for additive scanner effects in combatted data
-#################################
+#################################-
+# test for additive scanner effects in combatted data ----
+#################################-
 addTestTableCombat <- addTest(idvar='subid', 
                               batchvar='batch', 
                               features=featurenames.combat, 
@@ -309,9 +309,9 @@ batchBoxplot(idvar='subid',
              colors=1:8,
              title='feature 5 after combat')
 
-#################################
-# test for multiplicative scanner effects in combatted data
-#################################
+#################################-
+# test for multiplicative scanner effects in combatted data ----
+#################################-
 multTestTableCombat <- multTest(idvar='subid', 
                                 batchvar='batch', 
                                 features=featurenames.combat, 
@@ -351,9 +351,9 @@ batchBoxplot(idvar='subid',
              orderby='var',
              title='Feature 3 after ComBat')
 
-#################################
-# plot trajectories before and after combat
-#################################
+#################################-
+# plot trajectories before and after combat ----
+#################################-
 par(mfrow=c(1,2))
 trajPlot(idvar='subid', 
          timevar='time',
@@ -375,9 +375,9 @@ trajPlot(idvar='subid',
          point.col=simdata$batch,
          line.col=simdata$diagnosis[!duplicated(simdata$subid)]+1)
 
-#################################
-# fit LME models before / after ComBat
-#################################
+#################################-
+# fit LME models before / after ComBat ----
+#################################-
 # before ComBat
 feature5.fit <- lmer(feature5 ~ age + diagnosis*time + (1|subid), data=simdata)
 feature5.batch.fit <- lmer(feature5 ~ age + diagnosis*time + as.factor(batch) + (1|subid), data=simdata)
